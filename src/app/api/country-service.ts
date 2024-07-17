@@ -1,5 +1,5 @@
+import * as countriesJson from './countries.json';
 import { CountryWithDistance } from './interfaces';
-import * as countriesJson from './search/countries.json';
 import { haversine } from './utils';
 
 export function findClosestCountries(
@@ -8,24 +8,26 @@ export function findClosestCountries(
   currentLon: number
 ): CountryWithDistance[] {
   // Filter countries based on the search query
+  //   sort alphabetically, slice top 3,
+  // calculate distances and sort by them
   const filteredCountries = countriesJson
     .filter((country) =>
       country.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
-    .slice(0, 3);
-
-  // Calculate distance for each filtered country and store it with the country data
-  const countriesWithDistance = filteredCountries.map((country) => {
-    const [countryLat, countryLon] = country.latlng;
-    const distance = haversine(currentLat, currentLon, countryLat, countryLon);
-    return { ...country, distance };
-  });
-
-  // Sort the countries by distance
-  const sortedCountries = countriesWithDistance.sort(
-    (a, b) => a.distance - b.distance
-  );
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .slice(0, 3)
+    .map((country) => {
+      const [countryLat, countryLon] = country.latlng;
+      const distance = haversine(
+        currentLat,
+        currentLon,
+        countryLat,
+        countryLon
+      );
+      return { ...country, distance };
+    })
+    .sort((a, b) => a.distance - b.distance);
 
   // Return the top 3 closest countries
-  return sortedCountries;
+  return filteredCountries;
 }

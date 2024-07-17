@@ -1,10 +1,13 @@
 'use client';
 
 import Head from 'next/head';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
 import { useRef, useState } from 'react';
 import '@/lib/env';
+
+import { getLocation } from '@/lib/utils';
 
 import ButtonLink from '@/components/links/ButtonLink';
 import UnderlineLink from '@/components/links/UnderlineLink';
@@ -13,6 +16,7 @@ type Country = {
   name: string;
   latlng: string;
   flag: string;
+  distance?: number;
 };
 
 const API_SEARCH_URL = '/api/search?q=';
@@ -24,7 +28,14 @@ export default function HomePage() {
   const [timer, setTimer] = useState<null | NodeJS.Timeout>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [countries, setCountries] = useState<Country[] | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  let currentCountryName = 'Austria';
+
+  const setCurrentLocation = async (): Promise<void> => {
+    const { country } = await getLocation();
+    currentCountryName = country && country.length > 0 ? country : 'Austria';
+  };
 
   const openSearch = (): void => {
     setSearchOpen(true);
@@ -96,6 +107,12 @@ export default function HomePage() {
           {/* <p className='mt-2 text-sm text-gray-800'>
             Find your closest countries{' '}
           </p> */}
+
+          {currentCountryName && (
+            <div className='block px-4 py-2 text-lg text-gray-700'>
+              <p>welcome {currentCountryName} !</p>
+            </div>
+          )}
 
           <form action='' className='mt-6 max-w-md mx-auto'>
             {/* <input type='search' name='search' id='' /> */}
@@ -172,14 +189,30 @@ export default function HomePage() {
                         tabIndex={-1}
                         id={`menu-item-${index}`}
                         key={country.name}
+                        onClick={() => setSelectedCountry(country)}
                       >
                         {country.name}
+                        <span>{Math.round(country.distance || 0)} km</span>
                       </a>
                     ))}
                 </div>
               </div>
             </div>
           </form>
+
+          {selectedCountry && (
+            <div className='block px-4 py-2 text-lg text-gray-700'>
+              <span>
+                <p>selected: {selectedCountry.name} !</p>
+                <Image
+                  src={selectedCountry.flag}
+                  alt={`${selectedCountry.name} flag`}
+                  width={32}
+                  height={32}
+                />
+              </span>
+            </div>
+          )}
 
           <br />
           <br />

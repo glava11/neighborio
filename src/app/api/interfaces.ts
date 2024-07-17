@@ -27,6 +27,7 @@ export interface Country {
   cioc?: string;
   independent: boolean;
   gini?: number;
+  distance?: number;
 }
 
 export interface Flags {
