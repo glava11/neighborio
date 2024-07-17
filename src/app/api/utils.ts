@@ -34,8 +34,6 @@ export async function getLocation() {
       console.log('[API log] location data:', data);
 
       if (data.status === 'success') {
-        console.log('[API log] Longitude:', data.lon);
-        console.log('[API log] Latitude:', data.lat);
         locationLat = data.lat;
         locationLon = data.lon;
       } else {

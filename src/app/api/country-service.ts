@@ -8,7 +8,7 @@ export function findClosestCountries(
   currentLon: number
 ): CountryWithDistance[] {
   // Filter countries based on the search query
-  //   sort alphabetically, slice top 3,
+  // sort alphabetically, slice top 3,
   // calculate distances and sort by them
   const filteredCountries = countriesJson
     .filter((country) =>
@@ -28,6 +28,5 @@ export function findClosestCountries(
     })
     .sort((a, b) => a.distance - b.distance);
 
-  // Return the top 3 closest countries
   return filteredCountries;
 }

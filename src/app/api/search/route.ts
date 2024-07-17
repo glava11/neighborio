@@ -10,7 +10,6 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const query = searchParams.get('q');
     const [locationLat, locationLon] = await getLocation();
-    console.log('[API log] req.nextUrl.searchParams: ', query);
 
     if (typeof query !== 'string') {
       return new NextResponse('Bad request', {
@@ -23,8 +22,6 @@ export async function GET(req: NextRequest) {
       locationLat,
       locationLon
     );
-
-    console.log('[API log] closestCountries: ', closestCountries);
 
     return NextResponse.json(closestCountries);
   } catch (error: Error | any) {

@@ -18,13 +18,7 @@ export async function getLocation() {
   await fetch('http://ip-api.com/json')
     .then((response) => response.json())
     .then((data) => {
-      console.log('[CLIENT log] location data:', data);
-
       if (data.status === 'success') {
-        console.log('[CLIENT log] Longitude:', data.lon);
-        console.log('[CLIENT log] Latitude:', data.lat);
-        console.log('[CLIENT log] Country:', data.country);
-        console.log('[CLIENT log] countryCode:', data.countryCode);
         locationLat = data.lat;
         locationLon = data.lon;
         countryName = data.country;
