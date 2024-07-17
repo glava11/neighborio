@@ -3,39 +3,72 @@
 import Head from 'next/head';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
-import useSwr from 'swr';
+import { useState } from 'react';
 import '@/lib/env';
 
 import ButtonLink from '@/components/links/ButtonLink';
 import UnderlineLink from '@/components/links/UnderlineLink';
 
-/**
- * SVGR Support
- * Caveat: No React Props Type.
- *
- * You can override the next-env if the type is important to you
- * @see https://stackoverflow.com/questions/68103844/how-to-override-next-js-svg-module-declaration
- */
-import Logo from '~/svg/Logo.svg';
+type Country = {
+  name: string;
+  latlng: string;
+  flag: string;
+};
 
-const API_URL = '/api/search?q=';
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const API_SEARCH_URL = '/api/search?q=';
+// const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function HomePage() {
   const search = useSearchParams();
-  const searchQuery = search.get('q');
-  const encodedSearchQuery = encodeURI(searchQuery || '');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [timer, setTimer] = useState<null | NodeJS.Timeout>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [countries, setCountries] = useState<Country[]>([]);
 
-  const { data, isLoading, error } = useSwr(
-    `${API_URL}${encodedSearchQuery}`,
-    fetcher
-  );
+  // const searchQuery = search.get('q');
+  // const encodedSearchQuery = encodeURI(searchQuery || '');
 
-  if (!data) {
-    return null;
-  }
+  // const { data, isLoading, error } = useSwr(
+  //   `${API_URL}${encodedSearchQuery}`,
+  //   fetcher
+  // );
 
-  console.log('[CLIENT log] data: ', data);
+  // if (!data) {
+  //   return null;
+  // }
+
+  // console.log('[CLIENT log] data: ', data);
+
+  const handleSearchOnChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    // console.log('[CLIENT log] event.target.value: ', event.target.value);
+
+    if (!event.target.value) {
+      return;
+    }
+
+    if (timer) {
+      clearTimeout(timer);
+    }
+
+    setIsLoading(true);
+    setTimer(
+      setTimeout(async () => {
+        try {
+          const res = await fetch(`${API_SEARCH_URL}${event.target.value}`);
+          if (res.ok) {
+            const data = await res.json();
+            setCountries(data);
+            console.log('[CLIENT log] data: ', data);
+          }
+          setIsLoading(false);
+        } catch (error) {
+          console.log('[CLIENT log] error: ', error);
+        }
+      }, 500)
+    );
+  };
 
   return (
     <main>
@@ -45,7 +78,6 @@ export default function HomePage() {
       <section className='bg-white'>
         <div className='layout relative flex min-h-screen flex-col items-center justify-center py-12 text-center'>
           <div className='flex flex-col items-center justify-center py-12 text-center'>
-            <Logo className='w-10' />
             <h1>neighborio</h1>
           </div>
           <br />
@@ -92,8 +124,9 @@ export default function HomePage() {
                 className='block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                 placeholder='Search your neighbors...'
                 required
+                onChange={handleSearchOnChange}
+                defaultValue={searchQuery}
               />
-
               <div
                 className='dropdown absolute z-10 mt-2 w-full origin-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
                 role='menu'
@@ -102,41 +135,32 @@ export default function HomePage() {
                 tabIndex={-1}
               >
                 <div className='py-1' role='none'>
-                  {isLoading ? (
+                  {isLoading && (
                     <p className='block px-4 py-2 text-lg text-gray-700'>
                       loading...
                     </p>
-                  ) : (
-                    <>
-                      <a
-                        href='#'
-                        className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        role='menuitem'
-                        tabIndex={-1}
-                        id='menu-item-0'
-                      >
-                        Account settings
-                      </a>
-                      <a
-                        href='#'
-                        className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        role='menuitem'
-                        tabIndex={-1}
-                        id='menu-item-1'
-                      >
-                        Support
-                      </a>
-                      <a
-                        href='#'
-                        className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        role='menuitem'
-                        tabIndex={-1}
-                        id='menu-item-2'
-                      >
-                        License
-                      </a>
-                    </>
                   )}
+
+                  {!isLoading && countries.length === 0 && (
+                    <p className='block px-4 py-2 text-lg text-gray-700'>
+                      No results found
+                    </p>
+                  )}
+
+                  {!isLoading &&
+                    countries.length > 0 &&
+                    countries.map((country, index) => (
+                      <a
+                        href='#'
+                        className='block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        role='menuitem'
+                        tabIndex={-1}
+                        id={`menu-item-${index}`}
+                        key={country.name}
+                      >
+                        {country.name}
+                      </a>
+                    ))}
                 </div>
               </div>
             </div>
