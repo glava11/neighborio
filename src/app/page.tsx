@@ -3,7 +3,7 @@
 import Head from 'next/head';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import '@/lib/env';
 
 import ButtonLink from '@/components/links/ButtonLink';
@@ -16,35 +16,39 @@ type Country = {
 };
 
 const API_SEARCH_URL = '/api/search?q=';
-// const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function HomePage() {
   const search = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [timer, setTimer] = useState<null | NodeJS.Timeout>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [countries, setCountries] = useState<Country[]>([]);
+  const [countries, setCountries] = useState<Country[] | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // const searchQuery = search.get('q');
-  // const encodedSearchQuery = encodeURI(searchQuery || '');
+  const openSearch = (): void => {
+    setSearchOpen(true);
+    if (dropdownRef.current) {
+      dropdownRef.current.hidden = false;
+      dropdownRef.current.classList.remove('hidden');
+    }
+  };
 
-  // const { data, isLoading, error } = useSwr(
-  //   `${API_URL}${encodedSearchQuery}`,
-  //   fetcher
-  // );
-
-  // if (!data) {
-  //   return null;
-  // }
-
-  // console.log('[CLIENT log] data: ', data);
+  const resetSearch = (): void => {
+    setSearchOpen(false);
+    setSearchQuery('');
+    setCountries(null);
+    if (dropdownRef.current) {
+      dropdownRef.current.hidden = true;
+      dropdownRef.current.classList.add('hidden');
+    }
+  };
 
   const handleSearchOnChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ): void => {
-    // console.log('[CLIENT log] event.target.value: ', event.target.value);
-
     if (!event.target.value) {
+      resetSearch();
       return;
     }
 
@@ -53,6 +57,7 @@ export default function HomePage() {
     }
 
     setIsLoading(true);
+    openSearch();
     setTimer(
       setTimeout(async () => {
         try {
@@ -125,14 +130,17 @@ export default function HomePage() {
                 placeholder='Search your neighbors...'
                 required
                 onChange={handleSearchOnChange}
+                onFocus={openSearch}
+                onAbort={resetSearch}
                 defaultValue={searchQuery}
               />
               <div
-                className='dropdown absolute z-10 mt-2 w-full origin-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
+                className='dropdown hidden absolute z-10 mt-2 w-full origin-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
                 role='menu'
                 aria-orientation='vertical'
                 aria-labelledby='menu-button'
                 tabIndex={-1}
+                ref={dropdownRef}
               >
                 <div className='py-1' role='none'>
                   {isLoading && (
@@ -141,13 +149,20 @@ export default function HomePage() {
                     </p>
                   )}
 
-                  {!isLoading && countries.length === 0 && (
+                  {!isLoading && !countries && (
+                    <p className='block px-4 py-2 text-lg text-gray-700'>
+                      search for countries
+                    </p>
+                  )}
+
+                  {!isLoading && countries && countries.length === 0 && (
                     <p className='block px-4 py-2 text-lg text-gray-700'>
                       No results found
                     </p>
                   )}
 
                   {!isLoading &&
+                    countries &&
                     countries.length > 0 &&
                     countries.map((country, index) => (
                       <a

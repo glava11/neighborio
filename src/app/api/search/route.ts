@@ -1,32 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import * as countriesJson from './countries.json';
+import { CountryWithDistance } from '@/app/api/interfaces';
+
+import { findClosestCountries } from '../country-service';
+import { getLocation } from '../utils';
 
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
     const query = searchParams.get('q');
+    const [locationLat, locationLon] = await getLocation();
     console.log('[API log] req.nextUrl.searchParams: ', query);
 
     if (typeof query !== 'string') {
-      //   throw new Error('query is not a string');
       return new NextResponse('Bad request', {
         status: 400,
       });
     }
 
-    // countriesJson.forEach((country: any) => {
-    //   console.log('[API log] country.name: ', country.name);
-    //   console.log('[API log] country.latlng: ', country.latlng);
-    //   console.log('[API log] country.flag: ', country.flag);
-    // });
+    const closestCountries: CountryWithDistance[] = findClosestCountries(
+      query,
+      locationLat,
+      locationLon
+    );
 
-    const countriesResult = countriesJson.filter((country: any) => {
-      return country.name.toLowerCase().includes(query.toLowerCase());
-    });
-    console.log('[API log] countriesResult: ', countriesResult);
+    console.log('[API log] closestCountries: ', closestCountries);
 
-    return NextResponse.json(countriesResult);
+    return NextResponse.json(closestCountries);
   } catch (error: Error | any) {
     console.error('[API log] error: ', error);
 
