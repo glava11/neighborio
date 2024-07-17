@@ -4,7 +4,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '@/lib/env';
 
 import { getLocation } from '@/lib/utils';
@@ -86,6 +86,19 @@ export default function HomePage() {
     );
   };
 
+  useEffect(() => {
+    console.log(
+      '[CLIENT log] useEffect -> currentCountryName: ',
+      currentCountryName
+    );
+    setCurrentLocation();
+  }, []);
+
+  const handleSelectedCountry = (country: Country): void => {
+    setSelectedCountry(country);
+    resetSearch();
+  };
+
   return (
     <main>
       <Head>
@@ -104,9 +117,6 @@ export default function HomePage() {
           <br />
 
           <h1 className='mt-4'>Find your closest countries</h1>
-          {/* <p className='mt-2 text-sm text-gray-800'>
-            Find your closest countries{' '}
-          </p> */}
 
           {currentCountryName && (
             <div className='block px-4 py-2 text-lg text-gray-700'>
@@ -115,7 +125,6 @@ export default function HomePage() {
           )}
 
           <form action='' className='mt-6 max-w-md mx-auto'>
-            {/* <input type='search' name='search' id='' /> */}
             <label
               htmlFor='default-search'
               className='mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white'
@@ -189,7 +198,7 @@ export default function HomePage() {
                         tabIndex={-1}
                         id={`menu-item-${index}`}
                         key={country.name}
-                        onClick={() => setSelectedCountry(country)}
+                        onClick={() => handleSelectedCountry(country)}
                       >
                         {country.name}
                         <span>{Math.round(country.distance || 0)} km</span>
@@ -202,8 +211,8 @@ export default function HomePage() {
 
           {selectedCountry && (
             <div className='block px-4 py-2 text-lg text-gray-700'>
-              <span>
-                <p>selected: {selectedCountry.name} !</p>
+              <span className='flex items-center justify-center gap-x-2'>
+                <p>you have selected: {selectedCountry.name} ! </p>
                 <Image
                   src={selectedCountry.flag}
                   alt={`${selectedCountry.name} flag`}
@@ -211,6 +220,10 @@ export default function HomePage() {
                   height={32}
                 />
               </span>
+              <p>
+                it is {Math.round(selectedCountry.distance || 0)} km away from
+                you!{' '}
+              </p>
             </div>
           )}
 
