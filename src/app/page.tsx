@@ -1,7 +1,9 @@
 'use client';
 
 import Head from 'next/head';
+import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
+import useSwr from 'swr';
 import '@/lib/env';
 
 import ButtonLink from '@/components/links/ButtonLink';
@@ -16,7 +18,25 @@ import UnderlineLink from '@/components/links/UnderlineLink';
  */
 import Logo from '~/svg/Logo.svg';
 
+const API_URL = '/api/search?q=';
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function HomePage() {
+  const search = useSearchParams();
+  const searchQuery = search.get('q');
+  const encodedSearchQuery = encodeURI(searchQuery || '');
+
+  const { data, isLoading, error } = useSwr(
+    `${API_URL}${encodedSearchQuery}`,
+    fetcher
+  );
+
+  if (!data) {
+    return null;
+  }
+
+  console.log('[CLIENT log] data: ', data);
+
   return (
     <main>
       <Head>
@@ -82,34 +102,41 @@ export default function HomePage() {
                 tabIndex={-1}
               >
                 <div className='py-1' role='none'>
-                  {/* <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" --> */}
-                  <a
-                    href='#'
-                    className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    role='menuitem'
-                    tabIndex={-1}
-                    id='menu-item-0'
-                  >
-                    Account settings
-                  </a>
-                  <a
-                    href='#'
-                    className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    role='menuitem'
-                    tabIndex={-1}
-                    id='menu-item-1'
-                  >
-                    Support
-                  </a>
-                  <a
-                    href='#'
-                    className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    role='menuitem'
-                    tabIndex={-1}
-                    id='menu-item-2'
-                  >
-                    License
-                  </a>
+                  {isLoading ? (
+                    <p className='block px-4 py-2 text-lg text-gray-700'>
+                      loading...
+                    </p>
+                  ) : (
+                    <>
+                      <a
+                        href='#'
+                        className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        role='menuitem'
+                        tabIndex={-1}
+                        id='menu-item-0'
+                      >
+                        Account settings
+                      </a>
+                      <a
+                        href='#'
+                        className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        role='menuitem'
+                        tabIndex={-1}
+                        id='menu-item-1'
+                      >
+                        Support
+                      </a>
+                      <a
+                        href='#'
+                        className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        role='menuitem'
+                        tabIndex={-1}
+                        id='menu-item-2'
+                      >
+                        License
+                      </a>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
