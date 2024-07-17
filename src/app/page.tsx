@@ -12,11 +12,21 @@ import { getLocation } from '@/lib/utils';
 import ButtonLink from '@/components/links/ButtonLink';
 import UnderlineLink from '@/components/links/UnderlineLink';
 
+import { siteConfig } from '@/constant/config';
+
 type Country = {
   name: string;
   latlng: string;
   flag: string;
   distance?: number;
+  population?: number;
+  topLevelDomain?: string;
+  capital?: string;
+};
+
+type Location = {
+  countryName: string;
+  countryCode: string;
 };
 
 const API_SEARCH_URL = '/api/search?q=';
@@ -29,12 +39,21 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [countries, setCountries] = useState<Country[] | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  let currentCountryName = 'Austria';
+  let currentCountryName = '';
+  let currentCountryCode = '';
 
-  const setCurrentLocation = async (): Promise<void> => {
-    const { country } = await getLocation();
+  const checkCurrentLocation = async (): Promise<void> => {
+    const { country, countryCode } = await getLocation();
     currentCountryName = country && country.length > 0 ? country : 'Austria';
+    currentCountryCode =
+      countryCode && countryCode.length > 0 ? countryCode : 'AT';
+
+    setCurrentLocation({
+      countryName: currentCountryName,
+      countryCode: currentCountryCode,
+    });
   };
 
   const openSearch = (): void => {
@@ -91,7 +110,12 @@ export default function HomePage() {
       '[CLIENT log] useEffect -> currentCountryName: ',
       currentCountryName
     );
-    setCurrentLocation();
+    checkCurrentLocation().then(() => {
+      console.log(
+        '[CLIENT log] useEffect -> then -> currentCountryName: ',
+        currentCountryName
+      );
+    });
   }, []);
 
   const handleSelectedCountry = (country: Country): void => {
@@ -116,15 +140,29 @@ export default function HomePage() {
           <br />
           <br />
 
-          <h1 className='mt-4'>Find your closest countries</h1>
-
-          {currentCountryName && (
-            <div className='block px-4 py-2 text-lg text-gray-700'>
-              <p>welcome {currentCountryName} !</p>
+          {currentLocation && (
+            <div className='block px-4 py-10 text-gray-700 max-w-lg md:max-w-xl'>
+              <span className='flex items-center justify-center gap-x-2'>
+                <h1 className='mt-4'>Hi {currentLocation?.countryName}</h1>
+                {/* as suggested by https://www.npmjs.com/package/country-flag-icons */}
+                <Image
+                  src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${currentLocation?.countryCode}.svg`}
+                  alt={`${currentLocation?.countryName} flag`}
+                  width={64}
+                  height={32}
+                />
+                <h1 className='mt-4'> !</h1>
+              </span>
+              <h1 className='mt-4 text-gray-700'>
+                Find your closest countries
+              </h1>
             </div>
           )}
 
-          <form action='' className='mt-6 max-w-md mx-auto'>
+          <form
+            action=''
+            className='block px-4 py-10 w-full max-w-lg md:max-w-xl'
+          >
             <label
               htmlFor='default-search'
               className='mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white'
@@ -201,7 +239,6 @@ export default function HomePage() {
                         onClick={() => handleSelectedCountry(country)}
                       >
                         {country.name}
-                        <span>{Math.round(country.distance || 0)} km</span>
                       </a>
                     ))}
                 </div>
@@ -210,20 +247,48 @@ export default function HomePage() {
           </form>
 
           {selectedCountry && (
-            <div className='block px-4 py-2 text-lg text-gray-700'>
+            <div className='block px-4 py-10 text-xl text-center text-gray-700 leading-10 max-w-lg md:max-w-xl'>
               <span className='flex items-center justify-center gap-x-2'>
-                <p>you have selected: {selectedCountry.name} ! </p>
                 <Image
                   src={selectedCountry.flag}
                   alt={`${selectedCountry.name} flag`}
-                  width={32}
+                  width={64}
                   height={32}
                 />
+                <p>
+                  {selectedCountry.name} is{' '}
+                  <b>
+                    {new Intl.NumberFormat().format(
+                      Math.round(selectedCountry.distance || 0)
+                    )}{' '}
+                    km{' '}
+                  </b>
+                  away from you!
+                </p>
               </span>
-              <p>
-                it is {Math.round(selectedCountry.distance || 0)} km away from
-                you!{' '}
-              </p>
+              <span className='flex items-center justify-center gap-x-2'>
+                <p>
+                  There is around{' '}
+                  <b>
+                    {new Intl.NumberFormat().format(
+                      Math.round(selectedCountry.population || 0)
+                    )}{' '}
+                    people
+                  </b>
+                  , their capital is <b>{selectedCountry.capital}</b> and top
+                  level domain is <b>{selectedCountry.topLevelDomain}</b>
+                </p>
+              </span>
+              <span className='flex items-center justify-center gap-x-2'>
+                <p>
+                  learn more about <b>{selectedCountry.name}</b> at{' '}
+                  <UnderlineLink
+                    href={`https://en.wikipedia.org/wiki/${selectedCountry.name}`}
+                  >
+                    wikipedia
+                  </UnderlineLink>
+                </p>
+              </span>
             </div>
           )}
 
@@ -244,7 +309,9 @@ export default function HomePage() {
 
           <footer className='absolute bottom-2 text-gray-700'>
             © {new Date().getFullYear()}{' '}
-            <UnderlineLink href='https://neighbor.io'>neighborio</UnderlineLink>
+            <UnderlineLink href={siteConfig.url}>
+              {siteConfig.title}
+            </UnderlineLink>
           </footer>
         </div>
       </section>

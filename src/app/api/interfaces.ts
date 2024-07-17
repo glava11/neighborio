@@ -1,5 +1,3 @@
-export type CountryType = Country[];
-
 export interface Country {
   name: string;
   topLevelDomain: string[];
