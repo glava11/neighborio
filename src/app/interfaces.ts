@@ -1,6 +1,6 @@
 export interface Country {
   name: string;
-  latlng: string;
+  latlng: number[];
   flag: string;
   distance?: number;
   population?: number;

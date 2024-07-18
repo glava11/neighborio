@@ -42,7 +42,7 @@ export default function HomePage() {
 
   useEffect(() => {
     checkCurrentLocation();
-  }, []);
+  });
 
   return (
     <main>

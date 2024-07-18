@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import clsx, { ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 

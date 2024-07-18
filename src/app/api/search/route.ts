@@ -24,10 +24,11 @@ export async function GET(req: NextRequest) {
     );
 
     return NextResponse.json(closestCountries);
-  } catch (error: Error | any) {
+  } catch (error: unknown) {
+    // eslint-disable-next-line no-console
     console.error('[API log] error: ', error);
 
-    return new NextResponse(JSON.stringify({ error: error?.message }), {
+    return new NextResponse(JSON.stringify({ error: error }), {
       status: 500,
     });
   }

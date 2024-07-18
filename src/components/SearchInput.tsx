@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 
+import logger from '@/lib/logger';
+
 import { Country } from '@/app/interfaces';
 
 interface SearchInputProps {
@@ -54,7 +56,7 @@ export default function SearchInput({ onSelectedCountry }: SearchInputProps) {
           }
           setIsLoading(false);
         } catch (error) {
-          console.log('[CLIENT log] error: ', error);
+          logger(error, '[CLIENT log] error ');
         }
       }, 500)
     );
@@ -96,7 +98,7 @@ export default function SearchInput({ onSelectedCountry }: SearchInputProps) {
           type='search'
           id='default-search'
           className='block w-full p-4 ps-10 text-lg text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-lime-500 focus:border-lime-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-lime-200 dark:focus:ring-lime-500 dark:focus:border-lime-500'
-          placeholder='Search your neighbors...'
+          placeholder='Search for countries ...'
           required
           onChange={handleSearchOnChange}
           onFocus={openSearch}

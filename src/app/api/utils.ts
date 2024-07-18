@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 export function haversine(
   lat1: number,
   lon1: number,
