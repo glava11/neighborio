@@ -38,6 +38,8 @@ export default function SearchInput({ onSelectedCountry }: SearchInputProps) {
     if (!event.target.value) {
       resetSearch();
       return;
+    } else if (event.target.value.replace(/\s/g, '').length < 2) {
+      return;
     }
 
     if (timer) {
@@ -49,7 +51,9 @@ export default function SearchInput({ onSelectedCountry }: SearchInputProps) {
     setTimer(
       setTimeout(async () => {
         try {
-          const res = await fetch(`${API_SEARCH_URL}${event.target.value}`);
+          const res = await fetch(
+            `${API_SEARCH_URL}${event.target.value.trim()}`
+          );
           if (res.ok) {
             const data = await res.json();
             setCountries(data);
@@ -69,7 +73,13 @@ export default function SearchInput({ onSelectedCountry }: SearchInputProps) {
   };
 
   return (
-    <form action='' className='block px-4 py-10 w-full max-w-lg md:max-w-xl'>
+    <form
+      action=''
+      className='block px-4 py-10 w-full max-w-lg md:max-w-xl'
+      onSubmit={(e: React.FormEvent) => {
+        e.preventDefault();
+      }}
+    >
       <label
         htmlFor='default-search'
         className='mb-2 text-sm font-medium text-gray-900 sr-only dark:text-lime-200'
@@ -95,7 +105,7 @@ export default function SearchInput({ onSelectedCountry }: SearchInputProps) {
           </svg>
         </div>
         <input
-          type='search'
+          type='text'
           id='default-search'
           className='block w-full p-4 ps-10 text-lg text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-lime-500 focus:border-lime-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-lime-200 dark:focus:ring-lime-500 dark:focus:border-lime-500'
           placeholder='Search for countries ...'

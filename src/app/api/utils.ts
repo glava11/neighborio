@@ -32,8 +32,6 @@ export async function getLocation() {
   await fetch('http://ip-api.com/json')
     .then((response) => response.json())
     .then((data) => {
-      console.log('[API log] location data:', data);
-
       if (data.status === 'success') {
         locationLat = data.lat;
         locationLon = data.lon;

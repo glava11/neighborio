@@ -42,7 +42,8 @@ export default function HomePage() {
 
   useEffect(() => {
     checkCurrentLocation();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main>
