@@ -16,8 +16,6 @@ import SelectedCountry from '@/components/SelectedCountry';
 import { Country, Location } from '@/app/interfaces';
 
 export default function HomePage() {
-  // const search = useSearchParams();
-
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
 

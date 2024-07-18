@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+// the distance between two points on the Earth's surface using the Haversine formula.
 export function haversine(
   lat1: number,
   lon1: number,
@@ -22,10 +23,11 @@ function deg2rad(degrees: number): number {
   return degrees * (Math.PI / 180);
 }
 
+// get appx location based on IP of requester
 export async function getLocation() {
   // API: https://ip-api.com/json
   // API response data structure:
-  // AT: {"status":"success","country":"Austria","countryCode":"AT","region":"9","regionName":"Vienna","city":"Vienna","zip":"1160","lat":48.2155,"lon":16.3075,"timezone":"Europe/Vienna","isp":"Liberty Global Operations B.V","org":"","as":"AS8412 T-Mobile Austria GmbH","query":"84.115.208.181"}
+  // {"status":"success","country":"Austria","countryCode":"AT","region":"9","regionName":"Vienna","city":"Vienna","zip":"1160","lat":48.2155,"lon":16.3075,"timezone":"Europe/Vienna","isp":"Liberty Global Operations B.V","org":"","as":"AS8412 T-Mobile Austria GmbH","query":"84.115.208.181"}
   let locationLat = 48.2155;
   let locationLon = 16.3075;
 
